@@ -31,4 +31,4 @@ dependencies {
     // Koin
     implementation("io.insert-koin:koin-ktor:3.5.6")
     implementation("io.insert-koin:koin-logger-slf4j:3.5.6")
-}
+} 
