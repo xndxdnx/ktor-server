@@ -1,5 +1,6 @@
 package com.example.repository
 
+import com.example.data.HeroDatabase
 import com.example.models.ApiResponse
 import com.example.models.Hero
 import kotlin.collections.emptyList
@@ -9,6 +10,29 @@ const val PREVIOUS_PAGE_KEY = "Previous Page"
 
 
 class HeroRepositoryImpl : HeroRepository{
+
+    private val databaseReady = lazy {
+        HeroDatabase.init { page1 + page2 + page3 + page4 + page5 }
+    }
+
+    private fun ensureDatabase() {
+        databaseReady.value
+    }
+
+    private fun buildPages() : Map<Int, List<Hero>> {
+
+        return HeroDatabase
+            .getAllHeroes()
+            .chunked(3)
+            .mapIndexed { index, list ->
+                index + 1 to list
+            }
+            .toMap()
+
+
+    }
+
+
     override val heroes: Map<Int, List<Hero>> by lazy { mapOf(
         1 to page1,
         2 to page2,
