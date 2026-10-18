@@ -1,22 +1,46 @@
 package com.example.repository
 
+import com.example.data.HeroDatabase
 import com.example.models.ApiResponse
 import com.example.models.Hero
+import com.example.models.HeroCreateRequest
+import io.ktor.server.http.content.FileSystemPaths
+import java.io.File
+import java.util.UUID
+import kotlin.String
 import kotlin.collections.emptyList
 
 const val NEXT_PAGE_KEY = "Next Page"
 const val PREVIOUS_PAGE_KEY = "Previous Page"
 
 
-class HeroRepositoryImpl : HeroRepository{
+class HeroRepositoryImpl : HeroRepository {
 
-    override val heroes: Map<Int, List<Hero>> by lazy { mapOf(
-        1 to page1,
-        2 to page2,
-        3 to page3,
-        4 to page4,
-        5 to page5
-    ) }
+    private val databaseReady by lazy {
+        HeroDatabase.init { page1 + page2 + page3 + page4 + page5 }
+    }
+
+    private fun ensureDatabase() {
+        databaseReady
+    }
+
+    private fun buildPages(): Map<Int, List<Hero>> {
+
+        return HeroDatabase
+            .getAllHeroes()
+            .chunked(3)
+            .mapIndexed { index, list ->
+                index + 1 to list
+            }
+            .toMap()
+
+    }
+
+    override val heroes: Map<Int, List<Hero>>
+        get() {
+            ensureDatabase()
+            return buildPages()
+        }
 
     override val page1 = listOf(
         Hero(
@@ -386,41 +410,89 @@ class HeroRepositoryImpl : HeroRepository{
 
     }
 
-    private fun findHeroes (query: String? ) : List<Hero>{
+    override suspend fun createHero(
+        heroRequest: HeroCreateRequest,
+        imageBytes: ByteArray,
+        fileExtension: String
+    ): ApiResponse {
+
+        ensureDatabase()
+
+        val newId = HeroDatabase.nextHeroId()
+
+        val saveExtension = fileExtension.lowercase().takeIf {
+            it in setOf("jpeg", "jpg", "png", "webp")
+        } ?: "jpg"
+
+        val fileName = "${UUID.randomUUID()}.$saveExtension"
+
+        val uploadDir = File("uploads/images").apply {
+            mkdirs()
+        }
+
+        File(uploadDir, fileName).writeBytes(imageBytes)
+
+        val hero = Hero(
+            id = newId,
+            name = heroRequest.name,
+            about = heroRequest.about,
+            rating = heroRequest.rating,
+            power = heroRequest.power,
+            month = heroRequest.month,
+            day = heroRequest.day,
+            family = heroRequest.family,
+            natureTypes = heroRequest.natureTypes,
+            abilities = heroRequest.abilities,
+            image = "/images/$fileName"
+        )
+
+        HeroDatabase.insertHero(hero)
+
+
+        return ApiResponse(
+            success = true,
+            message = "Hero created successfully",
+            lastUpdater = System.currentTimeMillis(),
+            heroes = listOf(hero)
+        )
+    }
+
+
+    private fun findHeroes(query: String?): List<Hero> {
 
         val foundedHeroes = mutableListOf<Hero>()
 
         return if (!query.isNullOrEmpty()) {
-            heroes.forEach { (pageNumber, heroes ) ->
-                    heroes.forEach { hero ->
-                        if(hero.name.lowercase().contains(query.lowercase())){
-                            foundedHeroes.add(hero)
-                        }
+            heroes.forEach { (pageNumber, heroes) ->
+                heroes.forEach { hero ->
+                    if (hero.name.lowercase().contains(query.lowercase())) {
+                        foundedHeroes.add(hero)
                     }
+                }
             }
             foundedHeroes
-        }else {
+        } else {
             emptyList()
         }
 
     }
 
-    private fun calculatePage(page: Int) : Map<String, Int?> {
-        var prefPage : Int? = page
-        var nextPage : Int? = page
+    private fun calculatePage(page: Int): Map<String, Int?> {
+        var prefPage: Int? = page
+        var nextPage: Int? = page
 
-        if( page in 1..4) {
+        if (page in 1..4) {
             nextPage = nextPage?.plus(1)
         }
 
-        if( page in 2..5) {
+        if (page in 2..5) {
             prefPage = prefPage?.minus(1)
         }
 
-        if(page == 1) {
+        if (page == 1) {
             prefPage = null
         }
-        if(page == 5) {
+        if (page == 5) {
             nextPage = null
         }
 

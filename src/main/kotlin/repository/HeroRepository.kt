@@ -2,6 +2,7 @@ package com.example.repository
 
 import com.example.models.ApiResponse
 import com.example.models.Hero
+import com.example.models.HeroCreateRequest
 
 interface HeroRepository {
 
@@ -14,6 +15,12 @@ interface HeroRepository {
     val page5 : List<Hero>
 
     suspend fun getAllHeroes(page: Int = 1) : ApiResponse
-
     suspend fun searchHeroes(name : String?) : ApiResponse
+
+    suspend fun createHero(
+        heroRequest: HeroCreateRequest,
+        imageBytes: ByteArray,
+        fileExtension: String
+    ) : ApiResponse
+
 }
