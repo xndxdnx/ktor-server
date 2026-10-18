@@ -36,16 +36,11 @@ class HeroRepositoryImpl : HeroRepository {
 
     }
 
-
-    override val heroes: Map<Int, List<Hero>> by lazy {
-        mapOf(
-            1 to page1,
-            2 to page2,
-            3 to page3,
-            4 to page4,
-            5 to page5
-        )
-    }
+    override val heroes: Map<Int, List<Hero>>
+        get() {
+            ensureDatabase()
+            return buildPages()
+        }
 
     override val page1 = listOf(
         Hero(

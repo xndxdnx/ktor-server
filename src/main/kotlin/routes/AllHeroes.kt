@@ -13,7 +13,7 @@ fun Route.getAllHeroes(
     get("/heroes") {
         try {
             val page = call.request.queryParameters["page"]?.toInt() ?: 1
-            require(page in 1..5)
+            require(page >= 1)
 
             val apiResponse = repository.getAllHeroes(page = page)
 
