@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.example.ServerTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-09-17T14:09:40.405Z" hostname="XIAOXIN" time="0.983">
+  <properties/>
+  <testcase name="access search heroes endpoint, query hero name, assert multiple hero result" classname="com.example.ServerTest" time="0.979"/>
+  <system-out><![CDATA[2026-09-17 17:09:41.114 [DefaultDispatcher-worker-2 @call-context#3] INFO  io.ktor.test - No ktor.deployment.watch patterns specified, automatic reload is not active.
+2026-09-17 17:09:41.144 [DefaultDispatcher-worker-2 @coroutine#4] INFO  [Koin] - Started 1 definitions in 0.6225 ms
+2026-09-17 17:09:41.218 [DefaultDispatcher-worker-2 @call-context#3] INFO  io.ktor.test - Application started in 0.121 seconds.
+2026-09-17 17:09:41.221 [DefaultDispatcher-worker-3 @coroutine#5] INFO  io.ktor.test - Responding at http://localhost:80
+2026-09-17 17:09:41.222 [DefaultDispatcher-worker-3 @coroutine#5] INFO  io.ktor.test - Responding at https://localhost:443
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
