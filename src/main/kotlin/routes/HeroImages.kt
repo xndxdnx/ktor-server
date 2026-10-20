@@ -60,10 +60,6 @@ fun Route.heroImages(
 
     }
 
-
-
-
-
 }
 
 private fun imageContentType(extension: String) : ContentType = when(extension.lowercase()){
