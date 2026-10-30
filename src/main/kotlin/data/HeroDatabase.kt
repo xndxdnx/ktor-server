@@ -17,6 +17,7 @@ import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
 import java.io.File
 import kotlin.collections.map
 
@@ -42,6 +43,17 @@ object HeroDatabase {
             }
         }
     }
+
+    fun updateRating(
+        rating: Double,
+        heroId: Int
+    ): Boolean = transaction {
+        HeroTable.update(
+            where = { HeroTable.id eq heroId }
+        ) { it[HeroTable.rating] = rating } > 0
+
+    }
+
 
     private fun insertHeroRow(hero: Hero) {
         HeroTable.insert {
