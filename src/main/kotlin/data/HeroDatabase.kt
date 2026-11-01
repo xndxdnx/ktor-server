@@ -51,7 +51,6 @@ object HeroDatabase {
         HeroTable.update(
             where = { HeroTable.id eq heroId }
         ) { it[HeroTable.rating] = rating } > 0
-
     }
 
 

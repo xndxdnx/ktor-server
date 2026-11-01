@@ -6,6 +6,7 @@ import com.example.routes.getAllHeroes
 import com.example.routes.heroImages
 import com.example.routes.root
 import com.example.routes.searchHeroes
+import com.example.routes.updateHeroRating
 import io.ktor.server.application.*
 import io.ktor.server.http.content.resources
 import io.ktor.server.http.content.static
@@ -22,6 +23,7 @@ fun Application.configureRouting() {
         getAllHeroes(heroRepository)
         createHero(heroRepository)
         heroImages()
+        updateHeroRating(heroRepository)
 
         // статические пути для отладки
         static("/images") {

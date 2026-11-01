@@ -23,4 +23,6 @@ interface HeroRepository {
         fileExtension: String
     ) : ApiResponse
 
+    suspend fun updateHeroRating(rating: Double, heroId: Int) : ApiResponse
+
 }

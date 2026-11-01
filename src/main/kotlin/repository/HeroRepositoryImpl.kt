@@ -1,6 +1,7 @@
 package com.example.repository
 
 import com.example.data.HeroDatabase
+import com.example.data.HeroTable
 import com.example.models.ApiResponse
 import com.example.models.Hero
 import com.example.models.HeroCreateRequest
@@ -15,32 +16,6 @@ const val PREVIOUS_PAGE_KEY = "Previous Page"
 
 
 class HeroRepositoryImpl : HeroRepository {
-
-    private val databaseReady by lazy {
-        HeroDatabase.init { page1 + page2 + page3 + page4 + page5 }
-    }
-
-    private fun ensureDatabase() {
-        databaseReady
-    }
-
-    private fun buildPages(): Map<Int, List<Hero>> {
-
-        return HeroDatabase
-            .getAllHeroes()
-            .chunked(3)
-            .mapIndexed { index, list ->
-                index + 1 to list
-            }
-            .toMap()
-
-    }
-
-    override val heroes: Map<Int, List<Hero>>
-        get() {
-            ensureDatabase()
-            return buildPages()
-        }
 
     override val page1 = listOf(
         Hero(
@@ -388,6 +363,64 @@ class HeroRepositoryImpl : HeroRepository {
             )
         )
     )
+
+//    init {
+//        HeroDatabase.init { page1 + page2 + page3 + page4 + page5 }
+//    }
+
+
+    private val databaseReady by lazy {
+        HeroDatabase.init { page1 + page2 + page3 + page4 + page5 }
+    }
+
+    private fun ensureDatabase() {
+        databaseReady
+    }
+
+    private fun buildPages(): Map<Int, List<Hero>> {
+
+        return HeroDatabase
+            .getAllHeroes()
+            .chunked(3)
+            .mapIndexed { index, list ->
+                index + 1 to list
+            }
+            .toMap()
+
+    }
+
+
+    override suspend fun updateHeroRating(rating: Double, heroId: Int): ApiResponse {
+
+        val hero = HeroDatabase.getAllHeroes().first { hero -> hero.id == heroId }
+
+        ensureDatabase()
+
+        if (rating !in 1.0..5.0  || rating % 1.0 != 0.0) {
+           throw IllegalArgumentException(
+                "Rating must be in 1 to 5"
+            )
+        }
+
+        val updated = HeroDatabase.updateRating(rating = rating, heroId = heroId)
+
+        if (!updated) throw IllegalArgumentException("Hero didn't found")
+
+        return ApiResponse(
+            success = true,
+            message = "ok",
+            heroes = listOf(hero),
+            lastUpdater = System.currentTimeMillis()
+        )
+    }
+
+    override val heroes: Map<Int, List<Hero>>
+        get() {
+            ensureDatabase()
+            return buildPages()
+        }
+
+
 
     override suspend fun getAllHeroes(page: Int): ApiResponse {
         return ApiResponse(
