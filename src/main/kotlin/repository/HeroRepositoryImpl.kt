@@ -1,15 +1,11 @@
 package com.example.repository
 
 import com.example.data.HeroDatabase
-import com.example.data.HeroTable
 import com.example.models.ApiResponse
 import com.example.models.Hero
 import com.example.models.HeroCreateRequest
-import io.ktor.server.http.content.FileSystemPaths
 import java.io.File
-import java.util.UUID
-import kotlin.String
-import kotlin.collections.emptyList
+import java.util.*
 
 const val NEXT_PAGE_KEY = "Next Page"
 const val PREVIOUS_PAGE_KEY = "Previous Page"
@@ -364,11 +360,6 @@ class HeroRepositoryImpl : HeroRepository {
         )
     )
 
-//    init {
-//        HeroDatabase.init { page1 + page2 + page3 + page4 + page5 }
-//    }
-
-
     private val databaseReady by lazy {
         HeroDatabase.init { page1 + page2 + page3 + page4 + page5 }
     }
@@ -388,7 +379,6 @@ class HeroRepositoryImpl : HeroRepository {
             .toMap()
 
     }
-
 
     override suspend fun updateHeroRating(rating: Double, heroId: Int): ApiResponse {
 
@@ -421,16 +411,24 @@ class HeroRepositoryImpl : HeroRepository {
         }
 
 
-
     override suspend fun getAllHeroes(page: Int): ApiResponse {
+
+        val allPages = heroes
+
+        val currentPage = allPages[page]
+            ?: throw IllegalArgumentException("Page not found")
+
+        val prevPage = if (page > 1) page - 1 else null
+
+        val nextPage = if (page < allPages.size) page + 1 else null
+
         return ApiResponse(
             success = true,
             message = "ok",
-            heroes = heroes[page]!!,
+            heroes = currentPage,
             lastUpdater = System.currentTimeMillis(),
-            nextPage = calculatePage(page = page)[NEXT_PAGE_KEY],
-            prefPage = calculatePage(page = page)[PREVIOUS_PAGE_KEY]
-
+            nextPage = nextPage,
+            prefPage = prevPage
         )
     }
 
@@ -481,7 +479,6 @@ class HeroRepositoryImpl : HeroRepository {
 
         HeroDatabase.insertHero(hero)
 
-
         return ApiResponse(
             success = true,
             message = "Hero created successfully",
@@ -511,27 +508,23 @@ class HeroRepositoryImpl : HeroRepository {
     }
 
     private fun calculatePage(page: Int): Map<String, Int?> {
-        var prefPage: Int? = page
-        var nextPage: Int? = page
 
-        if (page in 1..4) {
-            nextPage = nextPage?.plus(1)
+        val totalPages = heroes.size
+
+        val prevPage = if (page > 1) {
+            page - 1
+        } else {
+            null
         }
 
-        if (page in 2..5) {
-            prefPage = prefPage?.minus(1)
+        val nextPage = if (page < totalPages) {
+            page + 1
+        } else {
+            null
         }
-
-        if (page == 1) {
-            prefPage = null
-        }
-        if (page == 5) {
-            nextPage = null
-        }
-
 
         return mapOf(
-            PREVIOUS_PAGE_KEY to prefPage,
+            PREVIOUS_PAGE_KEY to prevPage,
             NEXT_PAGE_KEY to nextPage
         )
     }
